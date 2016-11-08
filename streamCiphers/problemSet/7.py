@@ -10,7 +10,9 @@ c1 = '6c73d5240a948c86981bc294814d'
 # m1: bytes -> hex -> int
 # c1: hexStr -> int
 key = int(binascii.hexlify(m1),16) ^ int(c1,16)
-key = '0'+'{:x}'.format(key)
+
+# key: int -> hex
+key = '{:x}'.format(key).zfill(len(c1)) # need to force same size, since it discards zeroes to the left by default
 
 c2 = int(binascii.hexlify(m2),16) ^ int(binascii.hexlify(bytes.fromhex(key)),16)
 c2 = '{:x}'.format(c2)
