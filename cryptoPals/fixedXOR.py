@@ -1,3 +1,6 @@
+#Fixed XOR
+#Write a function that takes two equal-length buffers and produces their XOR combination. 
+
 import binascii
 
 def fixedXOR(h1, h2):
