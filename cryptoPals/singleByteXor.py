@@ -1,66 +1,114 @@
-#RESULTS ARE FREAKING VARYING!!!
-
-#3. Single-byte XOR cipher
-#  The hex encoded string:
-#    1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736
-#... has been XOR'd against a single character. Find the key, decrypt the message. 
-
+import itertools
+import math
 import binascii
-from collections import Counter
 
-# xor the cipher with each char
-def xorSingleByte(h):
-    s = binascii.unhexlify(h).decode('ascii')
+def xor(key, ct):
+    res = b''
+    for c in ct:
+        res += bytes([key^c])
+    return res
 
-    xored = []
-    for x in range(256):
-        res = ""
-        for c in s:
-            res += chr(ord(c)^x)
-        xored.append(res)
-    return xored
+# chi-squared goodness-of-fit >> NOT WORKING
+def score(msg):
+    letterFrequency = {
+    'a': 0.0651738,
+    'b': 0.0124248,
+    'c': 0.0217339,
+    'd': 0.0349835,
+    'e': 0.1041442,
+    'f': 0.0197881,
+    'g': 0.0158610,
+    'h': 0.0492888,
+    'i': 0.0558094,
+    'j': 0.0009033,
+    'k': 0.0050529,
+    'l': 0.0331490,
+    'm': 0.0202124,
+    'n': 0.0564513,
+    'o': 0.0596302,
+    'p': 0.0137645,
+    'q': 0.0008606,
+    'r': 0.0497563,
+    's': 0.0515760,
+    't': 0.0729357,
+    'u': 0.0225134,
+    'v': 0.0082903,
+    'w': 0.0171272,
+    'x': 0.0013692,
+    'y': 0.0145984,
+    'z': 0.0007836,
+    ' ': 0.1918182 
+}
+    score = 0
+    counted = []
+    for b in msg:
+        if b not in counted:
+            c = chr(b).lower()
+            if c in letterFrequency:
+                counted.append(b)
+                expected = len(msg)*letterFrequency[c] 
+                score += math.pow( msg.count(b) - expected, 2)/expected
+    return score
 
-# defines which chars are valid to an english word
-def setValidChars():
-    validChars = []
-    for c in range(32, 127): # plz check ASCII table
-        validChars.append(chr(c))
-    return validChars
+def score2(msg):
+    letterFrequency = {
+    'a': 0.0651738,
+    'b': 0.0124248,
+    'c': 0.0217339,
+    'd': 0.0349835,
+    'e': 0.1041442,
+    'f': 0.0197881,
+    'g': 0.0158610,
+    'h': 0.0492888,
+    'i': 0.0558094,
+    'j': 0.0009033,
+    'k': 0.0050529,
+    'l': 0.0331490,
+    'm': 0.0202124,
+    'n': 0.0564513,
+    'o': 0.0596302,
+    'p': 0.0137645,
+    'q': 0.0008606,
+    'r': 0.0497563,
+    's': 0.0515760,
+    't': 0.0729357,
+    'u': 0.0225134,
+    'v': 0.0082903,
+    'w': 0.0171272,
+    'x': 0.0013692,
+    'y': 0.0145984,
+    'z': 0.0007836,
+    ' ': 0.1918182 
+}
 
-# removes strings that have more non-valid chars than defined
-def preProcessing(xored, rate):
-    validChars = setValidChars()
-    numValid = 0
-    processed=[]
-    for s in xored:
-        numValid=0
-        for c in s:
-            if c in validChars:
-                numValid += 1
-        if numValid/len(s) >= rate:
-            processed.append(s)
-    return processed
+    score=0
+    for b in msg:
+        c = chr(b).lower()
+        if c in letterFrequency:
+            score += letterFrequency[c]
+    return score
 
-# return the sum (totalError) of frequency error of each char (letterError) in the string relative to real frequency
-def freqError(s):
-    letterFrequency = [('e',0.12702), ('t',0.09056), ('a',0.08167), ('o',0.07507), ('i',0.06966), ('n',0.06749), ('s',0.06327), ('h',0.06094), ('r',0.05987), ('d',0.04253), ('l',0.04025), ('c',0.02782), ('u',0.02758), ('m',0.02406), ('w',0.02360), ('f',0.02228), ('g',0.02015), ('y',0.01974), ('p',0.01929), ('b',0.01492), ('v',0.00978), ('k',0.00772), ('j',0.00153), ('x',0.00150), ('q',0.00095), ('z',0.00074)]
-    sMostCommon = []
-    totalError = 0
-    for t in letterFrequency:
-        letterError = 0
-        letterError = abs(s.count(t[0])/len(s) - t[1])
-        totalError += letterError
+def xoredKeyScore(msg):
+    scores = []
+    for key in range(0, 256):
+#        xored = xor(key, msg).lower()
+        xored = xor(key, msg)
+        scores.append( (xored, key, score2(xored)) )
+    return scores
+
+def getResults(xoredKeyScore):
+    return sorted(xoredKeyScore, key=lambda tup: tup[2])[-1:]
+
+def printResults(result):
+    for i in range(0, len(result)):
+        print("String: {}\nKey: {}\nScore: {}".format(result[i][0], chr(result[i][1]), result[i][2]))
+
+if __name__ == "__main__":
+    h = '1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736'
+    msg = binascii.a2b_hex(h)
     
-    return (s, totalError)
+    xoredKeyScore = xoredKeyScore(msg)
 
-h = '1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736'
-xored = xorSingleByte(h)
-
-xoredProc = preProcessing(xored, 0.7)
-
-res=[]
-for s in xoredProc:
-    tupleS_error = freqError(s)
-    res.append(tupleS_error)
-d = sorted(res, key=lambda x:x[1])
-print(d[:1][0][0])
+    results = getResults(xoredKeyScore)
+    #printResults(results)
+    printResults(results)
