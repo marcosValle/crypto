@@ -113,12 +113,15 @@ def printResults(result):
     for i in range(0, len(result)):
         print("String: {}\nKey: {}\nScore: {}".format(result[i][0], chr(result[i][1]), result[i][2]))
 
+def breakSingleByteXor(msg):
+    xks = xoredKeyScore(msg)
+    results = getResults(xks)
+    return results
+ 
+
 if __name__ == "__main__":
     h = '1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736'
     msg = binascii.a2b_hex(h)
+    results = breakSingleByteXor(msg)
     
-    xoredKeyScore = xoredKeyScore(msg)
-
-    results = getResults(xoredKeyScore)
-    #printResults(results)
     printResults(results)
