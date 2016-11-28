@@ -1,16 +1,10 @@
 import itertools
 import math
 import binascii
+import scipy
+from scipy.stats import chisquare
 
-def xor(key, ct):
-    res = b''
-    for c in ct:
-        res += bytes([key^c])
-    return res
-
-# chi-squared goodness-of-fit >> NOT WORKING
-def score(msg):
-    letterFrequency = {
+letterFrequency = {
     'a': 0.0651738,
     'b': 0.0124248,
     'c': 0.0217339,
@@ -39,18 +33,34 @@ def score(msg):
     'z': 0.0007836,
     ' ': 0.1918182 
 }
-    score = 0
-    counted = []
-    for b in msg:
-        if b not in counted:
-            c = chr(b).lower()
-            if c in letterFrequency:
-                counted.append(b)
-                expected = len(msg)*letterFrequency[c] 
-                score += math.pow( msg.count(b) - expected, 2)/expected
-    return score
+ 
+def xor(key, ct):
+    res = b''
+    for c in ct:
+        res += bytes([key^c])
+    return res
 
-def score2(msg):
+# chi-squared goodness-of-fit >> NOT WORKING
+def chiSquareScore(msg):
+    expectedFreqs = list(letterFrequency.values())
+    observedFreqs = []
+
+    for letter, freq in letterFrequency.items():
+        observedFreqs.append( msg.lower().count(ord(letter))/len(msg) )
+
+#    score = 0
+#    counted = []
+#    for b in msg:
+#        if b not in counted:
+#            c = chr(b).lower()
+#            if c in letterFrequency:
+#                counted.append(b)
+#                expected = len(msg)*letterFrequency[c] 
+#                score += math.pow( msg.count(b) - expected, 2)/expected
+#    print(counted)
+    return chisquare(observedFreqs, expectedFreqs)
+
+def charFreqScore(msg):
     letterFrequency = {
     'a': 0.0651738,
     'b': 0.0124248,
@@ -93,7 +103,7 @@ def xoredKeyScore(msg):
     for key in range(0, 256):
 #        xored = xor(key, msg).lower()
         xored = xor(key, msg)
-        scores.append( (xored, key, score2(xored)) )
+        scores.append( (xored, key, charFreqScore(xored)) )
     return scores
 
 def getResults(xoredKeyScore):
