@@ -2,7 +2,6 @@
 # Convert hex string to base64
 # RULE: Always operate on raw bytes, never on encoded strings. Only use hex and base64 for pretty-printing.
 import binascii
-import unittest
 
 def h2b64(h):
     #hex to bin
