@@ -6,6 +6,11 @@ def aesDecECB(ct, key):
     pt = aes.decrypt(ct)
     return pt
 
+def aesEncECB(pt, key):
+    aes = AES.new(key, AES.MODE_ECB)
+    ct = aes.encrypt(pt)
+    return ct
+
 with open("7.txt") as f:
     ct = binascii.a2b_base64(f.read())
 
