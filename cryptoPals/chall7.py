@@ -15,5 +15,5 @@ with open("7.txt") as f:
     ct = binascii.a2b_base64(f.read())
 
 if __name__ == "__main__":
-    key = "YELLOW SUBMARINE"
+    key = b"YELLOW SUBMARINE"
     print(aesDecECB(ct, key))
