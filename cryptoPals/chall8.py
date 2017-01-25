@@ -15,11 +15,12 @@ def detectECB(ct):
         return ct
     return ''
 
-with open("8.txt") as f:
-    txt = f.read()
+if __name__ == "__main__":
+    with open("8.txt") as f:
+        txt = f.read()
 
-cts = txt.split('\n')
+    cts = txt.split('\n')
 
-for ct in cts:
-    if detectECB(ct):
-        print(detectECB(ct))
+    for ct in cts:
+        if detectECB(ct):
+            print(detectECB(ct))
