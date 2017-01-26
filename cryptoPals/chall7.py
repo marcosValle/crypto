@@ -11,9 +11,9 @@ def aesEncECB(pt, key):
     ct = aes.encrypt(pt)
     return ct
 
-with open("7.txt") as f:
-    ct = binascii.a2b_base64(f.read())
-
 if __name__ == "__main__":
+    with open("7.txt") as f:
+        ct = binascii.a2b_base64(f.read())
     key = b"YELLOW SUBMARINE"
+    print(ct)
     print(aesDecECB(ct, key))
